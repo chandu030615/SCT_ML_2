@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Segmentation Analysis Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <h1>Customer Segmentation Analysis Dashboard</h1>
+            <p>AI-Powered Retail Customer Insights using K-means Clustering</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Data Upload Section -->
+        <section class="card section" id="upload-section">
+            <div class="card__body">
+                <h2>Data Upload</h2>
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <svg class="upload-icon" width="48" height="48" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                        </svg>
+                        <p>Drag & drop your CSV file here or click to browse</p>
+                        <p class="upload-info">Supports Mall_Customers.csv format</p>
+                        <input type="file" id="file-input" accept=".csv" class="hidden">
+                        <button class="btn btn--outline" id="browse-btn">Browse Files</button>
+                        <button class="btn btn--primary" id="sample-data-btn">Use Sample Data</button>
+                    </div>
+                </div>
+                
+                <div class="data-preview hidden" id="data-preview">
+                    <h3>Data Preview</h3>
+                    <div class="data-stats">
+                        <div class="stat">
+                            <span class="stat-value" id="rows-count">0</span>
+                            <span class="stat-label">Rows</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="columns-count">0</span>
+                            <span class="stat-label">Columns</span>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table" id="data-table">
+                            <thead id="table-head"></thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Configuration Section -->
+        <section class="card section hidden" id="config-section">
+            <div class="card__body">
+                <h2>Analysis Configuration</h2>
+                <div class="config-grid">
+                    <div class="config-group">
+                        <h3>Feature Selection</h3>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="age-feature" checked>
+                                <span class="checkmark"></span>
+                                Age
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="income-feature" checked>
+                                <span class="checkmark"></span>
+                                Annual Income
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="spending-feature" checked>
+                                <span class="checkmark"></span>
+                                Spending Score
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="gender-feature">
+                                <span class="checkmark"></span>
+                                Include Gender Analysis
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="config-group">
+                        <h3>Clustering Parameters</h3>
+                        <div class="form-group">
+                            <label for="clusters-slider" class="form-label">
+                                Number of Clusters: <span id="clusters-value">5</span>
+                            </label>
+                            <input type="range" id="clusters-slider" class="slider" min="2" max="15" value="5">
+                        </div>
+                        <button class="btn btn--primary btn--lg" id="run-analysis-btn">Run Analysis</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Section -->
+        <section class="card section hidden" id="loading-section">
+            <div class="card__body">
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <h3>Running K-means Clustering Analysis...</h3>
+                    <p>Please wait while we segment your customers</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="section hidden" id="results-section">
+            <!-- Analysis Metrics -->
+            <div class="card">
+                <div class="card__body">
+                    <h2>Analysis Results</h2>
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <span class="metric-value" id="total-customers">200</span>
+                            <span class="metric-label">Total Customers</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-value" id="optimal-clusters">5</span>
+                            <span class="metric-label">Optimal Clusters</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-value" id="silhouette-score">0.344</span>
+                            <span class="metric-label">Silhouette Score</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-value" id="analysis-date">2025-09-21</span>
+                            <span class="metric-label">Analysis Date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualizations -->
+            <div class="charts-grid">
+                <div class="card chart-card">
+                    <div class="card__body">
+                        <h3>Income vs Spending Score by Cluster</h3>
+                        <div class="chart-container" style="position: relative; height: 400px;">
+                            <canvas id="scatter-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card chart-card">
+                    <div class="card__body">
+                        <h3>Cluster Distribution</h3>
+                        <div class="chart-container" style="position: relative; height: 400px;">
+                            <canvas id="pie-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card chart-card">
+                    <div class="card__body">
+                        <h3>Age Distribution by Cluster</h3>
+                        <div class="chart-container" style="position: relative; height: 400px;">
+                            <canvas id="bar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card chart-card">
+                    <div class="card__body">
+                        <h3>Gender Distribution by Cluster</h3>
+                        <div class="chart-container" style="position: relative; height: 400px;">
+                            <canvas id="stacked-bar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Business Insights Section -->
+        <section class="card section hidden" id="insights-section">
+            <div class="card__body">
+                <h2>Business Insights</h2>
+                <div class="insights-grid" id="insights-grid">
+                    <!-- Insights will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Export Section -->
+        <section class="card section hidden" id="export-section">
+            <div class="card__body">
+                <h2>Export Results</h2>
+                <div class="export-buttons">
+                    <button class="btn btn--outline" id="export-csv-btn">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                        </svg>
+                        Download Segmented Data (CSV)
+                    </button>
+                    <button class="btn btn--outline" id="export-summary-btn">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                        </svg>
+                        Download Cluster Summary (CSV)
+                    </button>
+                    <button class="btn btn--primary" id="export-report-btn">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                        </svg>
+                        Download Analysis Report (PDF)
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
